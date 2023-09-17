@@ -1,30 +1,48 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 import { Card, Space } from 'antd';
 import './App.css';
 import ToDoItem from './components/ToDoItem';
 import InputArea from './components/InputArea';
-import AppBar from '@mui/material/AppBar';
+
 import Navbar from './components/Navbar';
+
 function App() {
   const [items, setItems] = useState([]);
+  const [editingItem, setEditingItem] = useState(null); // ใช้เก็บข้อมูลที่ถูกแก้ไข
 
   function addItem(inputText) {
-    setItems(prevItem => {
-      return [...prevItem, inputText];
+    setItems(prevItems => {
+      return [...prevItems, inputText];
     });
   }
+
   function deleteItem(id) {
-    setItems(prevItem => {
-      return prevItem.filter((item, index) => {
+    setItems(prevItems => {
+      return prevItems.filter((item, index) => {
         return index !== id;
       });
     });
   }
+
+  // ฟังก์ชันสำหรับการแก้ไขข้อมูล
+  function editItem(id, newText) {
+    setItems(prevItems => {
+      const updatedItems = prevItems.map((item, index) => {
+        if (index === id) {
+          return newText;
+        }
+        return item;
+      });
+      return updatedItems;
+    });
+    setEditingItem(null); // เมื่อแก้ไขเสร็จให้เคลียร์ข้อมูลที่ถูกแก้ไข
+  }
+
   return (
     <>
       <Navbar />
-      <Card className="container_card" style={{ width: 300, height: 500 }}>
+      <Card className="container_card">
         <h2
           style={{
             backgroundColor: '#FCFF3E',
@@ -53,6 +71,10 @@ function App() {
                 id={index}
                 text={todoitem}
                 onChecked={deleteItem}
+                onEdit={newText => setEditingItem({ id: index, text: newText })}
+                isEditing={editingItem && editingItem.id === index}
+                onCancelEdit={() => setEditingItem(null)}
+                onSaveEdit={newText => editItem(index, newText)}
               />
             ))}
           </ul>
